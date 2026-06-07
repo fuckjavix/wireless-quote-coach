@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📡 Wireless Quote Coach
 
-## Getting Started
+A simple quote-planning and sales training tool for wireless sales reps.
 
-First, run the development server:
+It runs in any browser — phone, tablet, or computer — and helps reps:
+
+- **Build quick customer quote estimates** (device payment, plan, trade-in, taxes, due today)
+- **Practice objections** with ready-to-use responses, follow-ups, and closes
+- **Explain plans in plain English** your customer will actually understand
+- **Save quotes** locally and reopen them to edit
+- **Run daily sales drills** to stay sharp
+
+> **Disclaimer:** Unofficial training and quote-planning tool. Pricing estimates must be verified with the carrier's official systems. Not affiliated with Verizon, AT&T, T-Mobile, or any carrier.
+
+---
+
+## Tech stack
+
+- [Next.js](https://nextjs.org/) (App Router)
+- React + TypeScript
+- Tailwind CSS
+- Browser **localStorage** for saved data (no database, no login, no payments)
+
+## Routes
+
+| URL | Page |
+| --- | --- |
+| `/` | Marketing landing page |
+| `/app` | App dashboard |
+| `/app/quote-builder` | Build a quote |
+| `/app/saved-quotes` | Saved quotes |
+| `/app/practice` | Practice objections |
+| `/app/plan-explainer` | Plan explainer |
+| `/app/daily-drill` | Daily drill |
+
+---
+
+## Run it locally
+
+You need [Node.js](https://nodejs.org/) 18.18 or newer installed.
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open **http://localhost:3000** in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Build for production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build   # create an optimized production build
+npm run start   # run the production build locally
+```
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Deploy to Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The easiest way to put this online.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Option A — Vercel dashboard (recommended)
 
-## Deploy on Vercel
+1. Push this project to GitHub (see below).
+2. Go to [vercel.com/new](https://vercel.com/new) and sign in with GitHub.
+3. Click **Import** on your `wireless-quote-coach` repository.
+4. Vercel auto-detects Next.js — leave the defaults and click **Deploy**.
+5. When it finishes you'll get a live URL like `https://wireless-quote-coach.vercel.app`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Every time you push to GitHub, Vercel redeploys automatically.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Option B — Vercel CLI
+
+```bash
+npm install -g vercel
+vercel          # follow the prompts to link/create the project
+vercel --prod   # deploy to production
+```
+
+---
+
+## Push to GitHub
+
+```bash
+git init
+git add .
+git commit -m "Initial commit: Wireless Quote Coach"
+git branch -M main
+# Create an empty repo on github.com first, then:
+git remote add origin https://github.com/<your-username>/wireless-quote-coach.git
+git push -u origin main
+```
+
+---
+
+## Notes
+
+- All data is stored in your browser's localStorage. Clearing your browser data
+  will remove saved quotes. There is no account system yet.
+- This is an MVP focused on being fast and useful on a phone. Login, cloud sync,
+  and team features are intentionally not included yet.
