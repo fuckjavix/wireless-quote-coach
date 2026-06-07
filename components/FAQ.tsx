@@ -4,7 +4,7 @@ import { useState } from "react";
 const faqs = [
   {
     q: "Is this an official carrier tool?",
-    a: "No. Wireless Quote Coach is an independent training and quote-planning tool. It isn't affiliated with Verizon, AT&T, T-Mobile, or any carrier, and every estimate should be verified in your carrier's official system before you give a customer a final price.",
+    a: "No. Wireless Quote Coach is an independent training and quote-planning tool. It isn't affiliated with Verizon, AT&T, T-Mobile, or any carrier, and every estimate should be verified in the carrier's official system before you give a customer a final price.",
   },
   {
     q: "Who is this built for?",
@@ -16,22 +16,18 @@ const faqs = [
   },
   {
     q: "Where is my quote data stored?",
-    a: "On the Starter plan, quotes are saved right on your device. Team and Store plans add secure cloud sync so quotes follow you across devices and managers can see team activity.",
+    a: "Right now quotes are saved on your device using your browser's storage. There's no account or login required to start using it.",
   },
   {
-    q: "Can my whole store use it?",
-    a: "Yes. The Store plan is built for managers — add your whole team, share objection scripts, and run daily drills to keep everyone sharp.",
-  },
-  {
-    q: "What does the free trial include?",
-    a: "Full access to quote building, the objection trainer, the plan explainer, and daily drills for 14 days. No credit card required to start.",
+    q: "Can I update the plan prices?",
+    a: "Yes. Plan presets and default pricing live in simple config files, so prices can be updated whenever carrier offers change. All pricing is an estimate and must be verified in official systems.",
   },
 ];
 
 export default function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
   return (
-    <div className="max-w-3xl mx-auto divide-y divide-slate-200 border-y border-slate-200">
+    <div className="max-w-3xl mx-auto divide-y divide-gray-200 border-y border-gray-200">
       {faqs.map((f, i) => {
         const isOpen = open === i;
         return (
@@ -40,10 +36,10 @@ export default function FAQ() {
               onClick={() => setOpen(isOpen ? null : i)}
               className="w-full flex items-center justify-between gap-4 py-5 text-left"
             >
-              <span className="font-medium text-slate-800">{f.q}</span>
-              <span className="text-slate-400 text-xl shrink-0 leading-none">{isOpen ? "–" : "+"}</span>
+              <span className="font-semibold text-ink">{f.q}</span>
+              <span className="text-brand text-xl shrink-0 leading-none">{isOpen ? "–" : "+"}</span>
             </button>
-            {isOpen && <p className="text-slate-600 text-sm leading-relaxed pb-5 -mt-1">{f.a}</p>}
+            {isOpen && <p className="text-gray-600 text-sm leading-relaxed pb-5 -mt-1">{f.a}</p>}
           </div>
         );
       })}

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Quote } from "@/lib/types";
 import { getSavedQuotes, deleteQuote } from "@/lib/storage";
 import SavedQuoteList from "@/components/SavedQuoteList";
+import PageHeader from "@/components/PageHeader";
 
 export default function SavedQuotesPage() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
@@ -22,12 +23,10 @@ export default function SavedQuotesPage() {
 
   return (
     <div>
-      <div className="mb-5">
-        <h1 className="text-xl font-bold text-slate-800">Saved Quotes</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          {quotes.length} quote{quotes.length !== 1 ? "s" : ""} saved
-        </p>
-      </div>
+      <PageHeader
+        title="Saved Quotes"
+        subtitle={`${quotes.length} quote${quotes.length !== 1 ? "s" : ""} saved`}
+      />
       <SavedQuoteList quotes={quotes} onDelete={handleDelete} />
     </div>
   );

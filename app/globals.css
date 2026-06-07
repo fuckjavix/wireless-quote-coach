@@ -1,16 +1,53 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────────────────────
+   BRAND COLORS — edit these to re-theme the whole app at once.
+   Inspired by a red / white / black / light-gray wireless brand.
+   ────────────────────────────────────────────────────────────── */
+@theme {
+  --color-brand: #ee0000;        /* primary red */
+  --color-brand-dark: #c20000;   /* darker red for hover */
+  --color-brand-tint: #fff5f5;   /* soft red wash for highlights */
+  --color-ink: #0b0b0c;          /* near-black text */
+
+  /* Soft, layered shadows for a premium card feel */
+  --shadow-card: 0 1px 2px 0 rgba(11, 11, 12, 0.04), 0 2px 8px -2px rgba(11, 11, 12, 0.06);
+  --shadow-pop: 0 12px 28px -8px rgba(11, 11, 12, 0.14);
+}
+
 :root {
-  --background: #f1f5f9;
-  --foreground: #0f172a;
+  --background: #f6f6f7;
+  --foreground: #0b0b0c;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   outline: none;
+}
+
+/* Hide the horizontal scrollbar on the mobile nav while keeping scroll */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Respect users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

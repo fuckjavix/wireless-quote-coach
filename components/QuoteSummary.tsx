@@ -19,12 +19,12 @@ function Row({
   negative?: boolean;
 }) {
   return (
-    <div className="flex justify-between items-start py-2.5">
-      <div>
-        <span className="text-slate-600 text-sm">{label}</span>
-        {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+    <div className="flex justify-between items-start py-3">
+      <div className="pr-3">
+        <span className="text-gray-600 text-sm">{label}</span>
+        {sub && <p className="text-xs text-gray-400 mt-0.5 leading-snug">{sub}</p>}
       </div>
-      <span className={`text-sm font-medium ${negative ? "text-emerald-600" : "text-slate-800"}`}>
+      <span className={`text-sm font-semibold tabular-nums shrink-0 ${negative ? "text-green-600" : "text-ink"}`}>
         {value}
       </span>
     </div>
@@ -34,7 +34,6 @@ function Row({
 export default function QuoteSummary({ quote, calc }: Props) {
   const lines = quote.numLines || 1;
 
-  // Has the rep actually started building anything yet?
   const started =
     quote.deviceRetailPrice > 0 ||
     quote.planPricePerLine > 0 ||
@@ -42,11 +41,13 @@ export default function QuoteSummary({ quote, calc }: Props) {
 
   if (!started) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-dashed border-slate-300 p-8 text-center">
-        <p className="text-3xl mb-2">🧾</p>
-        <p className="font-medium text-slate-600 text-sm">Your quote will appear here</p>
-        <p className="text-slate-400 text-xs mt-1">
-          Start by adding a customer name, device price, or plan price.
+      <div className="bg-white rounded-2xl shadow-card border border-dashed border-gray-300 p-10 text-center">
+        <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl mx-auto mb-3">
+          🧾
+        </div>
+        <p className="font-semibold text-ink text-sm">Your quote will appear here</p>
+        <p className="text-gray-400 text-xs mt-1.5 leading-relaxed max-w-[220px] mx-auto">
+          Start by adding a customer name, device price, or plan price on the left.
         </p>
       </div>
     );
@@ -66,14 +67,15 @@ export default function QuoteSummary({ quote, calc }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="font-bold text-slate-800 text-base">
+      <div className="bg-white rounded-2xl shadow-card border border-gray-200/80 overflow-hidden">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 p-5 pb-4 border-b border-gray-100">
+          <div className="min-w-0">
+            <h3 className="font-bold text-ink text-base truncate">
               {quote.customerName.trim() || "New Quote"}
             </h3>
             {(quote.deviceModel || quote.planName) && (
-              <p className="text-slate-500 text-sm">
+              <p className="text-gray-500 text-sm truncate">
                 {[`${quote.deviceBrand} ${quote.deviceModel}`.trim(), quote.planName]
                   .filter(Boolean)
                   .join(" · ")}
@@ -81,17 +83,18 @@ export default function QuoteSummary({ quote, calc }: Props) {
             )}
           </div>
           <span
-            className={`text-xs px-2 py-1 rounded-full font-medium ${
+            className={`shrink-0 text-xs px-2.5 py-1 rounded-full font-semibold ${
               quote.customerType === "new"
-                ? "bg-emerald-100 text-emerald-700"
-                : "bg-sky-100 text-sky-700"
+                ? "bg-brand-tint text-brand"
+                : "bg-gray-100 text-gray-600"
             }`}
           >
-            {quote.customerType === "new" ? "New Customer" : "Existing"}
+            {quote.customerType === "new" ? "New" : "Existing"}
           </span>
         </div>
 
-        <div className="divide-y divide-slate-100">
+        {/* Line items */}
+        <div className="px-5 divide-y divide-gray-100">
           <Row
             label={`Plan · ${lines} line${lines > 1 ? "s" : ""}`}
             value={formatCurrency(calc.monthlyServiceCost)}
@@ -101,11 +104,7 @@ export default function QuoteSummary({ quote, calc }: Props) {
                 : undefined
             }
           />
-          <Row
-            label="Device payment"
-            value={formatCurrency(calc.monthlyDevicePayment)}
-            sub={deviceSub}
-          />
+          <Row label="Device payment" value={formatCurrency(calc.monthlyDevicePayment)} sub={deviceSub} />
           {quote.protectionMonthly > 0 && (
             <Row label="Protection" value={formatCurrency(quote.protectionMonthly)} />
           )}
@@ -124,34 +123,38 @@ export default function QuoteSummary({ quote, calc }: Props) {
           )}
         </div>
 
-        <div className="mt-4 pt-4 border-t-2 border-slate-200 space-y-3">
-          <div className="flex justify-between items-baseline">
-            <span className="font-semibold text-slate-700 text-sm">Estimated monthly</span>
-            <span className="font-bold text-3xl text-indigo-600 tabular-nums">
+        {/* Big totals */}
+        <div className="bg-ink text-white p-5">
+          <div className="flex justify-between items-end">
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-widest pb-1.5">
+              Est. monthly
+            </span>
+            <span className="font-extrabold text-4xl text-white tabular-nums leading-none tracking-tight">
               {formatCurrency(calc.estimatedMonthlyTotal)}
+              <span className="text-gray-500 text-base font-bold">/mo</span>
             </span>
           </div>
-          <div className="flex justify-between items-center bg-slate-50 rounded-xl px-3 py-2.5">
-            <span className="text-slate-600 text-sm font-medium">Due today</span>
-            <span className="font-bold text-slate-800 text-lg tabular-nums">
+          <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/10">
+            <span className="text-gray-400 text-xs font-bold uppercase tracking-widest">Due today</span>
+            <span className="font-extrabold text-2xl text-brand tabular-nums leading-none">
               {formatCurrency(calc.dueTodayEstimate)}
             </span>
           </div>
           {deviceNet < 0 && (
-            <p className="text-xs text-emerald-600">
-              Trade-in and down payment cover the full device cost — no monthly device charge.
+            <p className="text-xs text-green-400 mt-3 leading-relaxed">
+              Trade-in and down payment cover the full device — no monthly device charge.
             </p>
           )}
         </div>
       </div>
 
       {/* Customer Script */}
-      <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5">
+      <div className="bg-brand-tint border border-brand/15 rounded-2xl p-5">
         <div className="flex items-center gap-2 mb-2">
-          <span className="text-lg">💬</span>
-          <h4 className="font-semibold text-indigo-800 text-sm">What to say to your customer</h4>
+          <span className="text-base">💬</span>
+          <h4 className="font-bold text-brand text-xs uppercase tracking-wide">What to say to your customer</h4>
         </div>
-        <p className="text-indigo-700 text-sm leading-relaxed">&ldquo;{script}&rdquo;</p>
+        <p className="text-ink text-sm leading-relaxed">&ldquo;{script}&rdquo;</p>
       </div>
     </div>
   );

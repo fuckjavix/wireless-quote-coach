@@ -3,50 +3,65 @@ import DashboardCard from "@/components/DashboardCard";
 const cards = [
   {
     href: "/app/quote-builder",
-    icon: "💰",
+    icon: "🧮",
     title: "Build a Quote",
-    description: "Build a custom wireless quote with device payments, plans, and perks.",
-    color: "bg-indigo-50",
-  },
-  {
-    href: "/app/practice",
-    icon: "🎯",
-    title: "Practice Objections",
-    description: "Get ready for the tough ones — price, competition, spouses, and more.",
-    color: "bg-emerald-50",
-  },
-  {
-    href: "/app/plan-explainer",
-    icon: "📋",
-    title: "Plan Explainer",
-    description: "Turn any plan's features into plain English your customer will actually understand.",
-    color: "bg-amber-50",
+    description: "Build a clean customer quote with device payments, plans, and trade-ins — plus a ready-to-read script.",
+    cta: "Start a quote",
+    primary: true,
   },
   {
     href: "/app/saved-quotes",
     icon: "📁",
     title: "Saved Quotes",
-    description: "View and manage all the quotes you've built and saved.",
-    color: "bg-sky-50",
+    description: "Reopen, edit, and review every quote you've built.",
+    cta: "View quotes",
+  },
+  {
+    href: "/app/practice",
+    icon: "🎯",
+    title: "Practice Objections",
+    description: "Rehearse the tough ones — price, competition, and more.",
+    cta: "Practice now",
+  },
+  {
+    href: "/app/plan-explainer",
+    icon: "📋",
+    title: "Plan Explainer",
+    description: "Turn any plan into plain English a customer will get.",
+    cta: "Explain a plan",
   },
   {
     href: "/app/daily-drill",
     icon: "🔥",
     title: "Daily Drill",
-    description: "Get a random customer scenario and sharpen your response skills.",
-    color: "bg-rose-50",
+    description: "A fresh scenario every day to keep your pitch sharp.",
+    cta: "Run today's drill",
   },
 ];
 
-export default function Home() {
+export default function Dashboard() {
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Welcome back, rep 👋</h1>
-        <p className="text-slate-500 mt-1 text-sm">
-          What do you want to work on today?
-        </p>
-      </div>
+      {/* Welcome hero */}
+      <section className="bg-ink rounded-3xl p-7 sm:p-9 mb-8 text-white relative overflow-hidden">
+        <div className="absolute -top-8 -right-8 w-52 h-52 bg-brand/25 rounded-full blur-3xl" />
+        <div className="relative">
+          <p className="text-brand font-bold text-xs uppercase tracking-widest mb-2">
+            Wireless Quote Coach
+          </p>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-[1.15]">
+            Build quotes faster. Explain plans clearer.
+            <br className="hidden sm:block" /> Close with more confidence.
+          </h1>
+          <p className="text-gray-400 text-sm mt-3 max-w-md">
+            Your sales command center — pick a tool below to get started.
+          </p>
+        </div>
+      </section>
+
+      <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3 px-1">
+        Your tools
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {cards.map((card) => (
           <DashboardCard key={card.href} {...card} />

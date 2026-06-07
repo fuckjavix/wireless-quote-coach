@@ -14,27 +14,32 @@ const links = [
 export default function Nav() {
   const pathname = usePathname();
   return (
-    <nav className="bg-slate-900 text-white sticky top-0 z-50">
-      <div className="max-w-4xl mx-auto px-4 flex items-center gap-1 overflow-x-auto">
+    <nav className="bg-white/90 backdrop-blur border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-4xl mx-auto px-4 flex items-center gap-1 overflow-x-auto no-scrollbar">
         <Link
           href="/"
-          className="font-bold text-indigo-400 text-sm whitespace-nowrap pr-3 py-3 shrink-0 hover:text-indigo-300"
+          className="flex items-center gap-2 whitespace-nowrap pr-5 py-3.5 shrink-0 font-extrabold text-ink"
         >
-          📡 Quote Coach
+          <span className="text-brand text-base leading-none">●</span>
+          <span className="text-sm tracking-tight">Quote Coach</span>
         </Link>
-        {links.map((l) => (
-          <Link
-            key={l.href}
-            href={l.href}
-            className={`text-sm px-3 py-3 whitespace-nowrap transition-colors ${
-              pathname === l.href
-                ? "text-white border-b-2 border-indigo-400"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            {l.label}
-          </Link>
-        ))}
+        {links.map((l) => {
+          const active = l.href === "/app" ? pathname === "/app" : pathname.startsWith(l.href);
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={`relative text-sm font-semibold px-3 py-3.5 whitespace-nowrap transition-colors ${
+                active ? "text-brand" : "text-gray-500 hover:text-ink"
+              }`}
+            >
+              {l.label}
+              {active && (
+                <span className="absolute left-3 right-3 -bottom-px h-0.5 bg-brand rounded-full" />
+              )}
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

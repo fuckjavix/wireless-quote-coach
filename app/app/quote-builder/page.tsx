@@ -4,8 +4,11 @@ import { useSearchParams } from "next/navigation";
 import { Quote } from "@/lib/types";
 import { calculateQuote, formatCurrency, buildCustomerScript } from "@/lib/calculations";
 import { saveQuote, getQuote } from "@/lib/storage";
+import { PRICING_CONFIG } from "@/data/pricing";
+import { PlanPreset } from "@/data/planPresets";
 import QuoteForm from "@/components/QuoteForm";
 import QuoteSummary from "@/components/QuoteSummary";
+import PageHeader from "@/components/PageHeader";
 
 function makeEmptyQuote(): Quote {
   return {
@@ -20,14 +23,14 @@ function makeEmptyQuote(): Quote {
     deviceRetailPrice: 0,
     tradeInValue: 0,
     downPayment: 0,
-    financingTerm: 36,
+    financingTerm: PRICING_CONFIG.defaultFinancingTerm,
     planName: "",
     planPricePerLine: 0,
-    autopayDiscount: 0,
-    protectionMonthly: 0,
-    perksMonthly: 0,
-    activationFee: 0,
-    taxesAndFees: 0,
+    autopayDiscount: PRICING_CONFIG.defaultAutopayDiscount,
+    protectionMonthly: PRICING_CONFIG.defaultProtectionMonthly,
+    perksMonthly: PRICING_CONFIG.defaultPerksMonthly,
+    activationFee: PRICING_CONFIG.defaultActivationFee,
+    taxesAndFees: PRICING_CONFIG.defaultTaxesAndFees,
   };
 }
 
@@ -41,7 +44,6 @@ function QuoteBuilder() {
   const [copied, setCopied] = useState(false);
 
   // Load an existing quote (from localStorage) when opened from the saved list.
-  // Runs after mount so it doesn't break server rendering.
   useEffect(() => {
     if (!editId) return;
     const existing = getQuote(editId);
@@ -60,6 +62,16 @@ function QuoteBuilder() {
 
   const handleChange = useCallback((field: keyof Quote, value: string | number) => {
     setQuote((prev) => ({ ...prev, [field]: value }));
+    setSaved(false);
+  }, []);
+
+  const handleApplyPreset = useCallback((preset: PlanPreset) => {
+    setQuote((prev) => ({
+      ...prev,
+      planName: preset.name,
+      planPricePerLine: preset.pricePerLine,
+      autopayDiscount: preset.autopayDiscount,
+    }));
     setSaved(false);
   }, []);
 
@@ -84,29 +96,25 @@ function QuoteBuilder() {
   };
 
   return (
-    <div className="pb-20 lg:pb-0">
-      <div className="mb-5">
-        <div className="flex items-center gap-2">
-          <h1 className="text-xl font-bold text-slate-800">
-            {isEditing ? "Edit Quote" : "Build a Quote"}
-          </h1>
-          {isEditing && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-medium">
-              Editing saved quote
-            </span>
-          )}
-        </div>
-        <p className="text-slate-500 text-sm mt-1">
-          {isEditing
+    <div className="pb-24 lg:pb-0">
+      <PageHeader
+        title={isEditing ? "Edit Quote" : "Build a Quote"}
+        subtitle={
+          isEditing
             ? "Make your changes — saving will update this quote."
-            : "Fill in the details — your estimate updates as you type."}
-        </p>
-      </div>
+            : "Fill in the details — your estimate updates as you type."
+        }
+      />
+      {isEditing && (
+        <span className="inline-block -mt-3 mb-4 text-xs px-2 py-0.5 rounded-full bg-brand-tint text-brand font-semibold">
+          Editing saved quote
+        </span>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Left: Form */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-          <QuoteForm quote={quote} onChange={handleChange} />
+        <div className="bg-white rounded-2xl shadow-card border border-gray-200/80 p-5 sm:p-6">
+          <QuoteForm quote={quote} onChange={handleChange} onApplyPreset={handleApplyPreset} />
         </div>
 
         {/* Right: Summary (sticky on desktop) */}
@@ -117,20 +125,20 @@ function QuoteBuilder() {
             <button
               onClick={handleSave}
               disabled={!started}
-              className="col-span-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold py-3 px-4 rounded-xl text-sm transition-colors"
+              className="col-span-2 bg-brand hover:bg-brand-dark disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none text-white font-bold py-3.5 px-4 rounded-xl text-sm shadow-card active:scale-[0.99] transition-all"
             >
-              {saved ? "✓ Saved" : isEditing ? "Update quote" : "Save quote"}
+              {saved ? "✓ Quote saved" : isEditing ? "Update quote" : "Save quote"}
             </button>
             <button
               onClick={handleCopy}
               disabled={!started}
-              className="bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 text-slate-700 font-medium py-2.5 px-4 rounded-xl text-sm transition-colors"
+              className="bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-50 text-ink font-semibold py-2.5 px-4 rounded-xl text-sm transition-colors"
             >
               {copied ? "✓ Copied" : "Copy script"}
             </button>
             <button
               onClick={handleClear}
-              className="bg-white border border-slate-200 hover:bg-red-50 hover:border-red-200 text-slate-500 hover:text-red-500 font-medium py-2.5 px-4 rounded-xl text-sm transition-colors"
+              className="bg-white border border-gray-200 hover:border-brand/40 text-gray-500 hover:text-brand font-semibold py-2.5 px-4 rounded-xl text-sm transition-colors"
             >
               Clear form
             </button>
@@ -140,22 +148,22 @@ function QuoteBuilder() {
 
       {/* Mobile sticky total bar */}
       {started && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] px-4 py-3 flex items-center justify-between z-40">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 shadow-[0_-4px_16px_rgba(0,0,0,0.07)] px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 z-40">
           <div>
-            <p className="text-[11px] text-slate-400 uppercase tracking-wide">Monthly</p>
-            <p className="font-bold text-indigo-600 text-lg leading-tight tabular-nums">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold">Monthly</p>
+            <p className="font-extrabold text-ink text-lg leading-tight tabular-nums">
               {formatCurrency(calc.estimatedMonthlyTotal)}
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[11px] text-slate-400 uppercase tracking-wide">Due today</p>
-            <p className="font-semibold text-slate-800 text-lg leading-tight tabular-nums">
+            <p className="text-[11px] text-gray-400 uppercase tracking-wide font-semibold">Due today</p>
+            <p className="font-bold text-brand text-lg leading-tight tabular-nums">
               {formatCurrency(calc.dueTodayEstimate)}
             </p>
           </div>
           <button
             onClick={handleSave}
-            className="bg-indigo-600 active:bg-indigo-700 text-white font-semibold py-2.5 px-5 rounded-xl text-sm"
+            className="bg-brand active:bg-brand-dark text-white font-bold py-2.5 px-5 rounded-xl text-sm"
           >
             {saved ? "✓" : "Save"}
           </button>
@@ -167,7 +175,7 @@ function QuoteBuilder() {
 
 export default function QuoteBuilderPage() {
   return (
-    <Suspense fallback={<div className="text-slate-400 text-sm">Loading…</div>}>
+    <Suspense fallback={<div className="text-gray-400 text-sm">Loading…</div>}>
       <QuoteBuilder />
     </Suspense>
   );
