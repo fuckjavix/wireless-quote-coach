@@ -4,8 +4,9 @@ import { useSearchParams } from "next/navigation";
 import { Quote } from "@/lib/types";
 import { calculateQuote, formatCurrency, buildCustomerScript } from "@/lib/calculations";
 import { saveQuote, getQuote } from "@/lib/storage";
-import { PRICING_CONFIG } from "@/data/pricing";
-import { PlanPreset } from "@/data/planPresets";
+import { FEES_CONFIG } from "@/config/feesConfig";
+import { getVerizonPlan } from "@/config/verizonPlanConfig";
+import { DEFAULT_LOCATION_ID } from "@/config/locationFeesConfig";
 import QuoteForm from "@/components/QuoteForm";
 import QuoteSummary from "@/components/QuoteSummary";
 import PageHeader from "@/components/PageHeader";
@@ -23,14 +24,14 @@ function makeEmptyQuote(): Quote {
     deviceRetailPrice: 0,
     tradeInValue: 0,
     downPayment: 0,
-    financingTerm: PRICING_CONFIG.defaultFinancingTerm,
+    financingTerm: FEES_CONFIG.defaultFinancingTerm,
+    planId: "",
     planName: "",
-    planPricePerLine: 0,
-    autopayDiscount: PRICING_CONFIG.defaultAutopayDiscount,
-    protectionMonthly: PRICING_CONFIG.defaultProtectionMonthly,
-    perksMonthly: PRICING_CONFIG.defaultPerksMonthly,
-    activationFee: PRICING_CONFIG.defaultActivationFee,
-    taxesAndFees: PRICING_CONFIG.defaultTaxesAndFees,
+    planPricePerLine: FEES_CONFIG.defaultCustomPricePerLine,
+    autopayDiscount: FEES_CONFIG.defaultAutopayDiscount,
+    protectionMonthly: FEES_CONFIG.defaultProtectionMonthly,
+    perksMonthly: FEES_CONFIG.defaultPerksMonthly,
+    locationId: DEFAULT_LOCATION_ID,
   };
 }
 
@@ -48,30 +49,47 @@ function QuoteBuilder() {
     if (!editId) return;
     const existing = getQuote(editId);
     if (existing) {
+      // Backfill fields for quotes saved before this update so old quotes still edit cleanly.
+      const normalized: Quote = {
+        ...existing,
+        planId: existing.planId ?? (existing.planName ? "custom" : ""),
+        locationId: existing.locationId ?? DEFAULT_LOCATION_ID,
+      };
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setQuote(existing);
+      setQuote(normalized);
       setIsEditing(true);
     }
   }, [editId]);
 
   const calc = calculateQuote(quote);
   const started =
-    quote.deviceRetailPrice > 0 ||
-    quote.planPricePerLine > 0 ||
-    quote.customerName.trim().length > 0;
+    quote.deviceRetailPrice > 0 || quote.planId !== "" || quote.customerName.trim().length > 0;
 
   const handleChange = useCallback((field: keyof Quote, value: string | number) => {
     setQuote((prev) => ({ ...prev, [field]: value }));
     setSaved(false);
   }, []);
 
-  const handleApplyPreset = useCallback((preset: PlanPreset) => {
-    setQuote((prev) => ({
-      ...prev,
-      planName: preset.name,
-      planPricePerLine: preset.pricePerLine,
-      autopayDiscount: preset.autopayDiscount,
-    }));
+  const handleSelectPlan = useCallback((planId: string) => {
+    setQuote((prev) => {
+      if (planId === "custom") {
+        return {
+          ...prev,
+          planId: "custom",
+          planName: prev.planId === "custom" ? prev.planName : "",
+          planPricePerLine: prev.planId === "custom" ? prev.planPricePerLine : FEES_CONFIG.defaultCustomPricePerLine,
+          autopayDiscount: prev.planId === "custom" ? prev.autopayDiscount : FEES_CONFIG.defaultAutopayDiscount,
+        };
+      }
+      const plan = getVerizonPlan(planId);
+      if (!plan) return prev;
+      return {
+        ...prev,
+        planId,
+        planName: plan.name,
+        autopayDiscount: plan.autopayDiscountPerLine,
+      };
+    });
     setSaved(false);
   }, []);
 
@@ -114,7 +132,7 @@ function QuoteBuilder() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Left: Form */}
         <div className="bg-white rounded-2xl shadow-card border border-gray-200/80 p-5 sm:p-6">
-          <QuoteForm quote={quote} onChange={handleChange} onApplyPreset={handleApplyPreset} />
+          <QuoteForm quote={quote} onChange={handleChange} onSelectPlan={handleSelectPlan} />
         </div>
 
         {/* Right: Summary (sticky on desktop) */}

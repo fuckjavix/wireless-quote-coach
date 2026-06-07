@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { PlanExplainerInput } from "@/lib/types";
 import { formatCurrency } from "@/lib/calculations";
-import { PLAN_PRESETS, PLAN_PRICING_DISCLAIMER } from "@/data/planPresets";
+import { VERIZON_PLANS, PLAN_PRICING_DISCLAIMER } from "@/config/verizonPlanConfig";
 
 const empty: PlanExplainerInput = {
   planName: "",
@@ -22,11 +22,11 @@ export default function PlanExplainer() {
     setInput((prev) => ({ ...prev, [field]: value }));
 
   const applyPreset = (id: string) => {
-    const p = PLAN_PRESETS.find((x) => x.id === id);
+    const p = VERIZON_PLANS.find((x) => x.id === id);
     if (!p) return;
     setInput({
       planName: p.name,
-      monthlyPrice: p.pricePerLine,
+      monthlyPrice: p.pricePerLineByLines[1],
       features: p.features.join(", "),
       bestFor: p.bestFor.replace(/\.$/, "").toLowerCase(),
     });
@@ -48,9 +48,9 @@ export default function PlanExplainer() {
           <label className="text-xs font-semibold text-gray-600 block mb-1">Quick-fill from a plan preset</label>
           <select className={inputCls} value="" onChange={(e) => applyPreset(e.target.value)}>
             <option value="">Choose a plan to auto-fill…</option>
-            {PLAN_PRESETS.map((p) => (
+            {VERIZON_PLANS.map((p) => (
               <option key={p.id} value={p.id}>
-                {p.name} — ${p.pricePerLine}/line
+                {p.name} — from ${p.pricePerLineByLines[1]}/line
               </option>
             ))}
           </select>

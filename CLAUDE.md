@@ -31,9 +31,12 @@ localStorage only.
 - This is **not** an official Verizon/AT&T/T-Mobile tool. Never use official carrier
   logos or claim prices are official. Brand styling is *inspired by* a red/white/black/
   light-gray palette only.
-- **Never hardcode pricing.** All editable pricing lives in:
-  - `data/pricing.ts` → default fees, autopay, protection, activation, taxes
-  - `data/planPresets.ts` → plan names, prices, features (placeholder values)
+- **Never hardcode pricing.** All editable pricing lives in `config/`:
+  - `config/verizonPlanConfig.ts` → myPlan presets (Welcome/Plus/Ultimate): per-line
+    prices by line count, autopay discount, features, hotspot, trade-in notes
+  - `config/feesConfig.ts` → locked setup fee ($30) + activation fee ($40), plus form defaults
+  - `config/locationFeesConfig.ts` → Summit County, CO estimated tax % + flat monthly fee
+  - Quote math lives in `lib/calculations.ts` and reads only from those config files
 - **Brand colors** are defined once in `app/globals.css` (`--color-brand`, `--color-ink`,
   etc.). Use the `brand` / `ink` / `brand-tint` Tailwind classes — don't scatter raw hex.
 - Keep it mobile-first and simple. Don't add login, payments, or a database yet.

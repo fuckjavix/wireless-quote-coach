@@ -11,20 +11,29 @@ export interface Quote {
   tradeInValue: number;
   downPayment: number;
   financingTerm: number;
+  /** "welcome" | "plus" | "ultimate" | "custom" | "" (none selected yet) */
+  planId: string;
   planName: string;
+  /** Used for Custom plans. Preset plans derive price from line count. */
   planPricePerLine: number;
+  /** Per-line autopay discount ($/mo). */
   autopayDiscount: number;
   protectionMonthly: number;
   perksMonthly: number;
-  activationFee: number;
-  taxesAndFees: number;
+  /** Location preset id for tax/fee estimates, e.g. "summit-co". */
+  locationId: string;
 }
 
 export interface QuoteCalculation {
-  monthlyDevicePayment: number;
+  perLinePrice: number;
   monthlyServiceCost: number;
+  monthlyDevicePayment: number;
   monthlyAutopayDiscount: number;
+  monthlySubtotalBeforeTaxes: number;
+  taxesAndFees: number;
   estimatedMonthlyTotal: number;
+  setupFee: number;
+  activationFee: number;
   dueTodayEstimate: number;
 }
 

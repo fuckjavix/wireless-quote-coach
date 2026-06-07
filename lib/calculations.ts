@@ -1,26 +1,67 @@
 import { Quote, QuoteCalculation } from "./types";
+import { getVerizonPlan, pricePerLineFor } from "@/config/verizonPlanConfig";
+import { FEES_CONFIG } from "@/config/feesConfig";
+import { getLocation, DEFAULT_LOCATION_ID } from "@/config/locationFeesConfig";
+
+// ──────────────────────────────────────────────────────────────
+//  QUOTE FORMULAS (all inputs come from the /config files)
+//
+//  per-line price        = preset plan tier for # of lines, OR custom price
+//  monthly service cost   = per-line price × number of lines
+//  monthly device payment = (retail − trade-in − down) ÷ financing term
+//  monthly autopay disc.  = autopay discount per line × number of lines
+//  subtotal before taxes  = service + device + protection + perks − autopay
+//  taxes & fees           = subtotal × location % + location flat fee
+//  estimated monthly total= subtotal + taxes & fees
+//  due today              = down payment + setup fee + activation fee
+// ──────────────────────────────────────────────────────────────
 
 export function calculateQuote(q: Quote): QuoteCalculation {
+  const numLines = q.numLines > 0 ? q.numLines : 1;
+
+  // Preset plans price by line count; custom plans use the manual per-line value.
+  const plan = q.planId && q.planId !== "custom" ? getVerizonPlan(q.planId) : undefined;
+  const perLinePrice = plan ? pricePerLineFor(plan, numLines) : q.planPricePerLine;
+
+  const monthlyServiceCost = perLinePrice * numLines;
+
   const monthlyDevicePayment =
     q.financingTerm > 0
-      ? (q.deviceRetailPrice - q.tradeInValue - q.downPayment) / q.financingTerm
+      ? Math.max(0, (q.deviceRetailPrice - q.tradeInValue - q.downPayment) / q.financingTerm)
       : 0;
-  const monthlyServiceCost = q.numLines * q.planPricePerLine;
-  const monthlyAutopayDiscount = q.numLines * q.autopayDiscount;
-  const estimatedMonthlyTotal =
+
+  const monthlyAutopayDiscount = q.autopayDiscount * numLines;
+
+  const monthlySubtotalBeforeTaxes = Math.max(
+    0,
     monthlyServiceCost +
-    monthlyDevicePayment +
-    q.protectionMonthly +
-    q.perksMonthly -
-    monthlyAutopayDiscount +
-    q.taxesAndFees;
-  const dueTodayEstimate = q.downPayment + q.activationFee;
+      monthlyDevicePayment +
+      q.protectionMonthly +
+      q.perksMonthly -
+      monthlyAutopayDiscount
+  );
+
+  const loc = getLocation(q.locationId) || getLocation(DEFAULT_LOCATION_ID);
+  const taxesAndFees = loc
+    ? monthlySubtotalBeforeTaxes * loc.taxFeePercent + loc.flatMonthlyFee
+    : 0;
+
+  const estimatedMonthlyTotal = monthlySubtotalBeforeTaxes + taxesAndFees;
+
+  const setupFee = FEES_CONFIG.setupFee;
+  const activationFee = FEES_CONFIG.activationFee;
+  const dueTodayEstimate = q.downPayment + setupFee + activationFee;
 
   return {
-    monthlyDevicePayment: Math.max(0, monthlyDevicePayment),
+    perLinePrice,
     monthlyServiceCost,
+    monthlyDevicePayment,
     monthlyAutopayDiscount,
-    estimatedMonthlyTotal: Math.max(0, estimatedMonthlyTotal),
+    monthlySubtotalBeforeTaxes,
+    taxesAndFees,
+    estimatedMonthlyTotal,
+    setupFee,
+    activationFee,
     dueTodayEstimate,
   };
 }
@@ -36,35 +77,17 @@ export function formatCurrency(value: number): string {
 // One source of truth for the customer-facing script, shared by the
 // builder page and the summary card so they never drift apart.
 export function buildCustomerScript(q: Quote, calc: QuoteCalculation): string {
-  const includes: string[] = ["your plan", "device payment"];
-  if (q.protectionMonthly > 0) includes.push("protection");
-  if (q.perksMonthly > 0) includes.push("perks");
-  includes.push("estimated taxes and fees");
+  const loc = getLocation(q.locationId) || getLocation(DEFAULT_LOCATION_ID);
+  const locLabel = loc ? `${loc.county}, ${loc.state}` : "your area";
+  const planLabel = q.planName ? `your ${q.planName} plan` : "your selected plan";
 
-  // Join with commas and a final "and".
-  const includesList =
-    includes.length > 1
-      ? `${includes.slice(0, -1).join(", ")}, and ${includes[includes.length - 1]}`
-      : includes[0];
-
-  const lines = [
-    `Based on what we built today, your estimated monthly total would be around ${formatCurrency(
+  return (
+    `Based on this estimate, your monthly total would be around ${formatCurrency(
       calc.estimatedMonthlyTotal
-    )} per month before final carrier verification.`,
-    `That includes ${includesList}.`,
-  ];
-
-  if (calc.monthlyAutopayDiscount > 0) {
-    lines.push(
-      `Setting up autopay saves you ${formatCurrency(
-        calc.monthlyAutopayDiscount
-      )} every month, which is already built into that number.`
-    );
-  }
-
-  lines.push(
-    `Your estimated due today would be ${formatCurrency(calc.dueTodayEstimate)}.`
+    )} including ${planLabel}, device payment, protection, perks, autopay savings, ` +
+    `and estimated ${locLabel} taxes and fees. ` +
+    `Your estimated due today would be ${formatCurrency(calc.dueTodayEstimate)}, which includes your down payment, ` +
+    `${formatCurrency(calc.setupFee)} setup fee, and ${formatCurrency(calc.activationFee)} activation fee. ` +
+    `Final pricing must be verified in official carrier systems.`
   );
-
-  return lines.join(" ");
 }
